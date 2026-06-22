@@ -185,17 +185,9 @@ void add(sparse_set_t* sparse_set, int elem){
 
                 //@assert sparse_set->sizeD == \at(sparse_set->sizeD,Pre);
         swap(sparse_set->sparse + elem, sparse_set->sparse + border_elem);
-        // tmp = sparse_set->sparse[elem];
-        // sparse_set->sparse[elem] = sparse_set->sparse[border_elem];
-        // sparse_set->sparse[border_elem] = tmp;
 
-        
         //@assert sparse_set->sizeD == \at(sparse_set->sizeD,Pre);
         swap(sparse_set->dense + elem_position, sparse_set->dense + sparse_set->sizeD);
-        // int tmp = sparse_set->dense[elem_position];
-        // sparse_set->dense[elem_position] = sparse_set->dense[sparse_set->sizeD];
-        // sparse_set->dense[sparse_set->sizeD] = tmp;
-
 
         //@assert sparse_set->sizeD == \at(sparse_set->sizeD,Pre);
         sparse_set->sizeD = sparse_set->sizeD + 1;

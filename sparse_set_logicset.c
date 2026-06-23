@@ -171,7 +171,7 @@ behavior add :
     assumes (0 <= elem < sparse_set->n) && !(sparse_set->sparse[elem] < sparse_set->sizeD);
     ensures sparse_set->sizeD == \old(sparse_set->sizeD) +1;
 
-    //ensures to_ls(*sparse_set,sparse_set->n) == \union(elem, to_ls{Pre}(\old(*sparse_set), \old(sparse_set->n)));
+    ensures to_ls(*sparse_set,sparse_set->sizeD) == \union(elem, to_ls{Pre}(\old(*sparse_set), \old(sparse_set->sizeD)));
     //ensures inv_sparse_set(*sparse_set);
 
 complete behaviors;
@@ -196,9 +196,8 @@ void add(sparse_set_t* sparse_set, int elem){
         //@assert sparse_set->dense[sparse_set->sizeD] == elem; 
         
         sparse_set->sizeD++;
-
-        //@assert elem \in to_ls(*sparse_set, sparse_set->n);
+        //@assert sparse_set->sparse[elem] < sparse_set->sizeD;
+        //@assert elem \in to_ls(*sparse_set, sparse_set->sizeD);
     }
 
 }
-

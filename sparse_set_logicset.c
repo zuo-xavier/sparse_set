@@ -159,13 +159,32 @@ void swap(int *a, int* b){
     *b = tmp;
 }
 
+/*@
+requires \forall integer k; 0 <= k < len ==> 0 <= a[k] < len;
+requires 0 <= len < INT_MAX;
+requires 0 <= i < len;
+requires 0 <= j < len;
+requires \valid(a + (0..len-1));
+assigns a[0..len-1];
+
+ensures \old(a[i]) == a[j] && \old(a[j]) == a[i];
+ensures \forall integer k; (0 <= k < len && k != i && k != j) ==> \old(a[k]) == a[k]; 
+*/
+
+void swap_array(int* a, int i, int j, int len){
+    int tmp = a[i];
+    a[i] = a[j];
+    a[j] = tmp;
+}
+
+
 
 /*@
 requires inv_sparse_set(*sparse_set);
 requires \valid(sparse_set);
 requires 0 <= elem < sparse_set->n;
-requires sparse_set->sizeD+1 < sparse_set->n;
-requires \separated(sparse_set->dense + (0..sparse_set->n-1),sparse_set->sparse + (0..sparse_set->n-1), &sparse_set->sizeD);
+requires sparse_set->sizeD < sparse_set->n < INT_MAX;
+requires \separated(sparse_set->dense + (0..sparse_set->n-1),sparse_set->sparse + (0..sparse_set->n-1), &sparse_set->sizeD, &sparse_set->n);
 assigns sparse_set->dense[0..sparse_set->n-1], sparse_set->sparse[0..sparse_set->n-1], sparse_set->sizeD;
 
 behavior notadd : 
@@ -178,7 +197,11 @@ behavior add :
     ensures sparse_set->sizeD == \old(sparse_set->sizeD) +1;
 
     ensures to_ls(*sparse_set,sparse_set->sizeD) == \union(elem, to_ls{Pre}(*sparse_set, sparse_set->sizeD));
-    ensures inv_sparse_set(*sparse_set);
+    ensures inv1(*sparse_set);
+    ensures inv2(*sparse_set);
+    ensures inv3(*sparse_set);
+    ensures inv4(*sparse_set);
+    ensures inv5(*sparse_set);
 
 complete behaviors;
 disjoint behaviors;
@@ -191,19 +214,41 @@ void add(sparse_set_t* sparse_set, int elem){
         int elem_position = sparse_set->sparse[elem];
         int border_elem = sparse_set->dense[sparse_set->sizeD];
 
+        
+        //@assert \forall integer i; 0 <= i < sparse_set->n ==> 0 <= sparse_set->sparse[i] < sparse_set->n;
 
-        swap(sparse_set->sparse + elem, sparse_set->sparse + border_elem);
+        //swap(sparse_set->sparse + elem, sparse_set->sparse + border_elem);
+        swap_array(sparse_set->sparse, elem, border_elem, sparse_set->n);
+        L: ;
         //@assert sparse_set->sparse[elem] == sparse_set->sizeD;
         //@assert sparse_set->sparse[border_elem] == elem_position;
-        //@assert \forall integer k; 0 <= k < sparse_set->n ==> sparse_set->dense[k] == \at(sparse_set->dense[k], Pre);
+
         
-        swap(sparse_set->dense + elem_position, sparse_set->dense + sparse_set->sizeD);
+        //@assert \forall integer k; 0 <= k < sparse_set->n ==> sparse_set->dense[k] == \at(sparse_set->dense[k], Pre);        
+        //@assert sparse_set->n == \at(sparse_set->n, Pre);
+        
+        //swap(sparse_set->dense + elem_position, sparse_set->dense + sparse_set->sizeD);
+        swap_array(sparse_set->dense, elem_position, sparse_set->sizeD, sparse_set->n);
         //@assert sparse_set->dense[elem_position] == border_elem;
         //@assert sparse_set->dense[sparse_set->sizeD] == elem; 
-        
+
+
+        //@assert \forall integer k; 0 <= k < sparse_set->n ==> sparse_set->sparse[k] == \at(sparse_set->sparse[k], L);
+
+        //@assert sparse_set->sparse[elem] == sparse_set->sizeD;
         sparse_set->sizeD++;
+        //@assert sparse_set->sparse[elem] < sparse_set->sizeD;
 
+        //@assert elem \in to_ls(*sparse_set, sparse_set->sizeD);
+        //@assert still_in{Pre}(*sparse_set);
 
+        //@assert sparse_set->n == \at(sparse_set->n, Pre);
+        //@assert  0 <= sparse_set->n; 
+        //@assert \valid(sparse_set->sparse + (0..sparse_set->n-1)) ;
+        //@assert \forall integer i; 0 <= i < sparse_set->n ==> 0 <= sparse_set->sparse[i] < sparse_set->n;
+    
 
+    }
 }
-}
+
+

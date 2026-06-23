@@ -153,11 +153,13 @@ void swap(int *a, int* b){
     *b = tmp;
 }
 
+
 /*@
 requires inv_sparse_set(*sparse_set);
 requires \valid(sparse_set);
 requires 0 <= elem < sparse_set->n;
-requires sparse_set->sizeD + 1 < INT_MAX;
+requires sparse_set->sizeD+1 < sparse_set->n;
+requires \separated(sparse_set->dense + (0..sparse_set->n-1),sparse_set->sparse + (0..sparse_set->n-1), &sparse_set->sizeD);
 assigns sparse_set->dense[0..sparse_set->n-1], sparse_set->sparse[0..sparse_set->n-1], sparse_set->sizeD;
 
 behavior notadd : 
@@ -183,16 +185,21 @@ void add(sparse_set_t* sparse_set, int elem){
         int elem_position = sparse_set->sparse[elem];
         int border_elem = sparse_set->dense[sparse_set->sizeD];
 
-                //@assert sparse_set->sizeD == \at(sparse_set->sizeD,Pre);
+
         swap(sparse_set->sparse + elem, sparse_set->sparse + border_elem);
+        //@assert sparse_set->sparse[elem] == sparse_set->sizeD;
+        //@assert sparse_set->sparse[border_elem] == elem_position;
 
-        //@assert sparse_set->sizeD == \at(sparse_set->sizeD,Pre);
         swap(sparse_set->dense + elem_position, sparse_set->dense + sparse_set->sizeD);
+        //@assert sparse_set->dense[elem_position] == border_elem;
+        //@assert sparse_set->dense[sparse_set->sizeD] == elem;
 
-        //@assert sparse_set->sizeD == \at(sparse_set->sizeD,Pre);
+        
+        //@assert elem \in to_ls(*sparse_set, sparse_set->n);
+
         sparse_set->sizeD = sparse_set->sizeD + 1;
-        //@assert sparse_set->sizeD == \at(sparse_set->sizeD,Pre) +1;
+
     }
 
-    
 }
+

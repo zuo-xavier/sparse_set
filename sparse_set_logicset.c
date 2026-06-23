@@ -189,16 +189,15 @@ void add(sparse_set_t* sparse_set, int elem){
         swap(sparse_set->sparse + elem, sparse_set->sparse + border_elem);
         //@assert sparse_set->sparse[elem] == sparse_set->sizeD;
         //@assert sparse_set->sparse[border_elem] == elem_position;
-
+        //@assert \forall integer k; 0 <= k < sparse_set->n ==> sparse_set->dense[k] == \at(sparse_set->dense[k], Pre);
+        
         swap(sparse_set->dense + elem_position, sparse_set->dense + sparse_set->sizeD);
         //@assert sparse_set->dense[elem_position] == border_elem;
-        //@assert sparse_set->dense[sparse_set->sizeD] == elem;
-
+        //@assert sparse_set->dense[sparse_set->sizeD] == elem; 
         
+        sparse_set->sizeD++;
+
         //@assert elem \in to_ls(*sparse_set, sparse_set->n);
-
-        sparse_set->sizeD = sparse_set->sizeD + 1;
-
     }
 
 }

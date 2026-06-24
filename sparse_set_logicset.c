@@ -252,3 +252,49 @@ void add(sparse_set_t* sparse_set, int elem){
 }
 
 
+/*@
+requires \valid(sparse_set);
+requires inv_sparse_set(*sparse_set);
+requires \separated(sparse_set->dense + (0..sparse_set->n-1),sparse_set->sparse + (0..sparse_set->n-1), &sparse_set->sizeD, &sparse_set->n);
+assigns sparse_set->sizeD;
+
+behavior incr : 
+    assumes sparse_set->sizeD < sparse_set->n; 
+    ensures \old(sparse_set->sizeD) + 1 == sparse_set->sizeD;
+    ensures  inv1(*sparse_set);
+    ensures  inv2(*sparse_set);
+    ensures  inv3(*sparse_set);
+    ensures  inv4(*sparse_set);
+    ensures  inv5(*sparse_set);
+*/
+void expand_sparse_set(sparse_set_t *sparse_set){
+    if(sparse_set->sizeD < sparse_set->n){
+
+        //@assert inv5(*sparse_set);
+        sparse_set->sizeD++;
+
+        //@assert \forall integer x; 0 <= x < sparse_set->n ==> (x \in to_ls(*sparse_set, sparse_set->sizeD) ==> sparse_set->sparse[x] < sparse_set->sizeD);
+
+        //@assert \forall integer x; 0 <= x < sparse_set->n ==> ( sparse_set->sparse[x] < sparse_set->sizeD ==> x \in to_ls(*sparse_set, sparse_set->sizeD));
+
+        //@assert inv5(*sparse_set);
+
+
+        //@assert \subset(to_ls(*sparse_set, sparse_set->n), (0..sparse_set->n -1));
+
+        //@assert \forall integer i; 0 <= i < sparse_set->n ==> sparse_set->sparse[i] == \at(sparse_set->sparse[i], Pre);
+        //@assert \forall integer i; 0 <= i < sparse_set->n ==> sparse_set->dense[i] == \at(sparse_set->dense[i], Pre);
+
+        //@assert dom_ran(sparse_set->sparse,sparse_set->n);
+        //@assert dom_ran(sparse_set->dense,sparse_set->n);
+        //@assert sparse_set->sizeD == \at(sparse_set->sizeD,Pre) +1;
+    }
+}
+
+/*@
+lemma oui: 
+    \forall sparse_set_t s; inv1(s) ==> \subset(to_ls(s,s.n), (0..s.n-1));
+
+lemma oui2: 
+    \forall sparse_set_t s; \subset(to_ls(s,s.n), (0..s.n-1)) ==> \subset(to_ls(s,s.sizeD), (0..s.n-1));
+*/

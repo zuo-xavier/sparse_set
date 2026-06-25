@@ -39,6 +39,16 @@ axiomatic to_logic_set {
 */
 
 /*@
+logic set<integer> to_set{L}(sparse_set_t sparse_s, integer size) =
+    size == 0 ? \empty : \union(to_set{L}(sparse_s, size-1), sparse_s.dense[size-1]);
+*/
+
+/*@
+logic set<integer> to_set_bis{L}(sparse_set_t sparse_set) = 
+    { i | integer i; 0 <= i < sparse_set.n && sparse_set.sparse[i] < sparse_set.sizeD };
+*/
+
+/*@
 predicate still_in{L}(sparse_set_t s) = 
 \forall integer a; a \in to_ls{L}(s, s.sizeD)
  ==> a \in to_ls(s,s.sizeD);
@@ -184,9 +194,7 @@ void swap_array(int* a, int i, int j, int len){
 
 
 /*@
-requires dom_ran(a, n);
-requires dom_ran(b, n);
-requires comp_is_id(a,b,n);
+requires dom_ran(a, n) && dom_ran(b, n) && comp_is_id(a,b,n);
 
 requires 0 <= i < n;
 requires 0 <= j < n;
@@ -196,10 +204,13 @@ assigns a[0..n-1], b[0..n-1];
 ensures \forall integer k; (0 <= k < n && k != i && k != j) ==> a[k] == \old(a[k]);
 ensures a[i] == \old(a[j]) && a[j] == \old(a[i]);
 
-
+ensures dom_ran(b,n);
+ensures dom_ran(a,n);
+ensures b[\old(a[i])] == \old(b[\old(a[j])]) && b[\old(a[j])] == \old(b[\old(a[i])]) ;
 ensures b[a[i]] == i && b[a[j]] == j;
 ensures \forall integer k; (0 <= k < n && k != \old(a[i]) && k != \old(a[j])) ==> b[k] == \old(b[k]);
 */
+
 void swap_two_array(int* a, int* b, int n, int i, int j){
     
     int tmp = a[i];
@@ -248,25 +259,38 @@ void add(sparse_set_t* sparse_set, int elem){
 
         
         //@assert \forall integer i; 0 <= i < sparse_set->n ==> 0 <= sparse_set->sparse[i] < sparse_set->n;
-        
+        //@assert inv_sparse_set(*sparse_set);
         swap_two_array(sparse_set->dense, sparse_set->sparse, sparse_set->n, sparse_set->sparse[elem], sparse_set->sizeD);
         //@assert sparse_set->dense[elem_position] == border_elem;
         //@assert sparse_set->dense[sparse_set->sizeD] == elem; 
         //@assert sparse_set->sparse[elem] == sparse_set->sizeD;
         //@assert sparse_set->sparse[border_elem] == elem_position;
+        //@assert inv_sparse_set(*sparse_set);
+
+        L: ;
 
         //@assert sparse_set->sparse[elem] == sparse_set->sizeD;
         sparse_set->sizeD++;
+
+
+        //@assert \forall integer i; 0 <= i < sparse_set->n ==> sparse_set->sparse[i] == \at(sparse_set->sparse[i], L);
+        //@assert \forall integer i; 0 <= i < sparse_set->n ==> sparse_set->dense[i] == \at(sparse_set->dense[i], L);
+        
+        //@assert inv1(*sparse_set);
+        //@assert inv2(*sparse_set);
+        //@assert inv3(*sparse_set);
+
+        //@assert \subset(to_ls(\at(*sparse_set,Pre), \at(sparse_set->sizeD,Pre)), (0..sparse_set->n-1));
+        //@assert sparse_set->dense[sparse_set->sizeD-1] \in (0..sparse_set->n-1);
+        //@assert sparse_set->dense[sparse_set->sizeD-1] \in to_ls(*sparse_set, sparse_set->sizeD);
+        
+        //@assert inv4(*sparse_set);
+        //@assert inv5(*sparse_set);
+        
         //@assert sparse_set->sparse[elem] < sparse_set->sizeD;
 
         //@assert elem \in to_ls(*sparse_set, sparse_set->sizeD);
         //@assert still_in{Pre}(*sparse_set);
-
-        //@assert sparse_set->n == \at(sparse_set->n, Pre);
-        //@assert  0 <= sparse_set->n; 
-        //@assert \valid(sparse_set->sparse + (0..sparse_set->n-1)) ;
-        //@assert \forall integer i; 0 <= i < sparse_set->n ==> 0 <= sparse_set->sparse[i] < sparse_set->n;
-    
 
     }
 }

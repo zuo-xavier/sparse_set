@@ -38,13 +38,9 @@ axiomatic to_logic_set {
 }
 */
 
-/*@
-logic set<integer> to_set{L}(sparse_set_t sparse_s, integer size) =
-    size == 0 ? \empty : \union(to_set{L}(sparse_s, size-1), sparse_s.dense[size-1]);
-*/
 
 /*@
-logic set<integer> to_set_bis{L}(sparse_set_t sparse_set) = 
+logic set<integer> to_set{L}(sparse_set_t sparse_set) = 
     { i | integer i; 0 <= i < sparse_set.n && sparse_set.sparse[i] < sparse_set.sizeD };
 */
 
@@ -239,7 +235,7 @@ behavior add :
     assumes (0 <= elem < sparse_set->n) && !(sparse_set->sparse[elem] < sparse_set->sizeD);
     ensures sparse_set->sizeD == \old(sparse_set->sizeD) +1;
 
-    ensures to_ls(*sparse_set,sparse_set->sizeD) == \union(elem, to_ls{Pre}(*sparse_set, sparse_set->sizeD));
+    ensures to_ls(*sparse_set,sparse_set->sizeD) == \union(elem, to_ls{Pre}(\old(*sparse_set), \old(sparse_set->sizeD)));
     ensures inv1(*sparse_set);
     ensures inv2(*sparse_set);
     ensures inv3(*sparse_set);
@@ -265,32 +261,61 @@ void add(sparse_set_t* sparse_set, int elem){
         //@assert sparse_set->dense[sparse_set->sizeD] == elem; 
         //@assert sparse_set->sparse[elem] == sparse_set->sizeD;
         //@assert sparse_set->sparse[border_elem] == elem_position;
-        //@assert inv_sparse_set(*sparse_set);
+
+        //@assert to_ls(*sparse_set,sparse_set->sizeD) == to_ls(\at(*sparse_set,Pre), \at(sparse_set->sizeD,Pre));
+        
+        //@assert inv1(*sparse_set);
+        //@assert inv2(*sparse_set);
+        //@assert inv3(*sparse_set);
+        //@assert inv4(*sparse_set);
+        //@assert inv5(*sparse_set);
 
         L: ;
 
         //@assert sparse_set->sparse[elem] == sparse_set->sizeD;
         sparse_set->sizeD++;
-
-
         //@assert \forall integer i; 0 <= i < sparse_set->n ==> sparse_set->sparse[i] == \at(sparse_set->sparse[i], L);
-        //@assert \forall integer i; 0 <= i < sparse_set->n ==> sparse_set->dense[i] == \at(sparse_set->dense[i], L);
+        //@assert \forall integer i; 0 <= i < sparse_set->n ==> sparse_set->dense[i] == \at(sparse_set->dense[i], L); 
+        
+        //@assert elem \in to_ls(*sparse_set, sparse_set->sizeD);
+        //@assert \subset(to_ls(*sparse_set, \at(sparse_set->sizeD,Pre)),to_ls(*sparse_set, sparse_set->sizeD));
+        
+        //@assert \forall integer i; 0 <= i < \at(sparse_set->sizeD,Pre) ==> sparse_set->dense[i] == \at(sparse_set->dense[i], Pre);
+
+
+        //@assert \subset(to_ls(\at(*sparse_set,Pre), \at(sparse_set->sizeD,Pre)),to_ls(*sparse_set, sparse_set->sizeD));
+
+        //@assert \subset(to_ls(\at(*sparse_set,Pre), \at(sparse_set->sizeD,Pre)),to_ls(*sparse_set, sparse_set->sizeD));
+        /*@assert to_ls(*sparse_set,sparse_set->sizeD) == 
+        \union(sparse_set->dense[sparse_set->sizeD-1],to_ls(\at(*sparse_set,Pre), \at(sparse_set->sizeD,Pre))); */
+     
+       
+
         
         //@assert inv1(*sparse_set);
         //@assert inv2(*sparse_set);
-        //@assert inv3(*sparse_set);
+        //@assert inv3(*sparse_set); 
 
         //@assert \subset(to_ls(\at(*sparse_set,Pre), \at(sparse_set->sizeD,Pre)), (0..sparse_set->n-1));
-        //@assert sparse_set->dense[sparse_set->sizeD-1] \in (0..sparse_set->n-1);
-        //@assert sparse_set->dense[sparse_set->sizeD-1] \in to_ls(*sparse_set, sparse_set->sizeD);
+        //@assert elem \in (0..sparse_set->n-1);
+        //@assert to_ls(*sparse_set,sparse_set->sizeD) == \union(elem, to_ls(\at(*sparse_set,Pre), \at(sparse_set->sizeD,Pre)));
         
+        //@assert \subset(\union(elem, to_ls(\at(*sparse_set,Pre), \at(sparse_set->sizeD,Pre))), (0..sparse_set->n-1));
+        //@assert \subset(to_ls(*sparse_set, sparse_set->sizeD), (0..sparse_set->n-1));
+
         //@assert inv4(*sparse_set);
         //@assert inv5(*sparse_set);
         
-        //@assert sparse_set->sparse[elem] < sparse_set->sizeD;
 
+        //@assert sparse_set->sparse[elem] < sparse_set->sizeD;
         //@assert elem \in to_ls(*sparse_set, sparse_set->sizeD);
         //@assert still_in{Pre}(*sparse_set);
 
     }
 }
+
+
+/*@
+   lemma lt_plus_lt:
+     \forall integer i, j ; i < j ==> i+1 < j+1;
+*/
